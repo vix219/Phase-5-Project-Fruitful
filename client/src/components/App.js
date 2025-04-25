@@ -1,8 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { Switch, Route } from "react-router-dom";
+import "../HomePage.css";
+import "../FruitType.css";
+import React from "react";
+// import React, { useEffect, useState } from "react";
+// import { Outlet } from "react-router-dom";
+import HomePage from "./HomePage";
+import Map from "./Map";
+import FruitType from "./FruitType";
+
+
 
 function App() {
-  return <h1>Project Client</h1>;
+  return (
+    <div className="main-container">
+      <HomePage />
+      <Map />
+      <FruitType/>
+    </div>
+  );
 }
 
 export default App;
