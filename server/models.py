@@ -7,6 +7,7 @@ from config import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_bcrypt import Bcrypt
+# import ipdb
 
 bcrypt = Bcrypt()  
 
@@ -33,6 +34,7 @@ class Tree(db.Model, SerializerMixin):
 
 class FruitType(db.Model, SerializerMixin):
     __tablename__ =  'fruit_types'
+    # ipdb.set_trace()
     id = db.Column(db.Integer, primary_key=True)
     fruit_name = db.Column(db.String, nullable=False)
     image_url = db.Column(db.String, nullable=False)

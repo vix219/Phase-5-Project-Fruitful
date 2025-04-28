@@ -28,6 +28,7 @@ db.init_app(app)
 
 # Instantiate REST API
 api = Api(app)
+app.secret_key = b'E%t\x90o\x84\x01|7b\xd1\xfa\xf5!\xeb\xf1'
 
 # Instantiate CORS
 CORS(app)
