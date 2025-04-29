@@ -1,182 +1,180 @@
-import React, { useState } from "react";
-import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
-// import AppButton form "./AppButton";
+// components/MapComponent.js
+
+import React, { useState, useEffect } from "react";
+import {
+  GoogleMap,
+  Marker,
+  InfoWindow,
+  useJsApiLoader,
+} from "@react-google-maps/api";
+import TreeListComponent from "./TreeListComponent";
+import "./Map.css";
+
+const containerStyle = {
+  width: "100%",
+  height: "400px",
+  borderRadius: "20px",
+};
+
+const center = {
+  lat: 30.2672,
+  lng: -97.7431,
+};
 
 const MapComponent = () => {
-    // store the clicked locations
-const [selectedLoction, setSelectedLocation] = useState({});
-// store list of all locations selected
-const [listOfLocations, setListOfLocations] = useState([]);
-//store marker locations
-//show marker on austin by default
-const [markerLocation, setMarkerLocation] = useState({
-    lat: 30.2672,
-    lng:-97.7431,
-});
-// store show dialog state to add location
-const [showDialog, setShowDialog] = useState(false);
-//store dialog location
-const [dialogLocation, setDialogLocation] = useState("");
+  const { isLoaded } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: "AIzaSyCfzg5rgZRzJOZ6JdhXDkukRLz0F1WEwvg", 
+  });
 
-// handleclick on MapComponent
-const handleMapClick = (mapProps) => {
-    // checks if location is clicked and valid
-    if (mapProps.detail.placeID) {
-        const lat = mapProps.detail.latLng.lat;
-        const lng = mapProps.detail.latLng.lng;
-        setShowDialog(true);
-        setDialogLocation({ lat, lng });
-        setSelectedLocation({ lat, lng });
-    } else {
-        //show alert message
-        alert("Please select the specific location");
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [dialogLocation, setDialogLocation] = useState(null);
+  const [listOfTrees, setListOfTrees] = useState([]);
+  const [showDialog, setShowDialog] = useState(false);
+  const [treeTypeInput, setTreeTypeInput] = useState("");
+  const [fruitTypes, setFruitTypes] = useState([]);
+  const [selectedFruitTypeId, setSelectedFruitTypeId] = useState("");
+
+  // Fetch trees and fruit types on load
+  useEffect(() => {
+    fetch("http://localhost:5555/trees")
+      .then((res) => res.json())
+      .then((data) => setListOfTrees(data))
+      .catch((err) => console.error("Error fetching trees:", err));
+
+    fetch("http://localhost:5555/fruit-type")
+      .then((res) => res.json())
+      .then((data) => setFruitTypes(data))
+      .catch((err) => console.error("Error fetching fruit types:", err));
+  }, []);
+
+  const handleMapClick = (e) => {
+    const lat = e.latLng.lat();
+    const lng = e.latLng.lng();
+    const location = { lat, lng };
+
+    setSelectedLocation(location);
+    setDialogLocation(location);
+    setShowDialog(true);
+  };
+
+  const onAddTree = async () => {
+    if (!selectedFruitTypeId) {
+      alert("Please select a fruit type.");
+      return;
     }
-}
-};
 
-// add locartion to show in list
-const onAddLocation = () => {
-    //create a google maps Geocode instance
     const geoCoder = new window.google.maps.Geocoder();
+    geoCoder.geocode({ location: selectedLocation }, async (results, status) => {
+      if (status === "OK" && results[0]) {
+       
 
-    // Reverse geocode the coordinates to get the place name 
-    geoCoder.geocode({ location: selectedLocation }, (results, status) => {
-        if ( status === "OK") {
-            if (results[0]) {
-                setListOfLocations([
-                    ...listOfLocations,
-                    { name: results[0].formatted_adress, location: selectedLocation },
-                ]);
-                setShowDialog(false);
-            }
-        } else {
-            console.error("Geocoder failed due to: " + status);
+        const newTree = {
+          lat: selectedLocation.lat,
+          lng: selectedLocation.lng,
+          user_id: 1, // Replace with user ID
+          fruit_type_id: parseInt(selectedFruitTypeId),
+          notes: treeTypeInput,
+        };
+
+        try {
+          const response = await fetch("http://localhost:5555/trees", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newTree),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            alert("Failed to add tree: " + JSON.stringify(errorData));
+            return;
+          }
+
+          const responseData = await response.json();
+          setListOfTrees([...listOfTrees, { ...newTree, id: responseData.id }]);
+          setShowDialog(false);
+          setTreeTypeInput("");
+          setSelectedFruitTypeId("");
+        } catch (err) {
+          console.error("Error adding tree:", err);
         }
+      } else {
+        alert("Geocoding failed.");
+      }
     });
-};
+  };
 
-// displays marker on the map for selected location
-const onViewLocaton = (loc) => {
-    setMarkerLocation({ lat: loc.lat, lng: loc.lng });
-};
-
-//deletes selected location from the list
-const onDeleteLocation = (loc) => {
-    let updatedList = listOfLocations.filter(
-        (l) => loc.lat !== l.location.lat && loc.lng !== l.location.lng
-    );
-    setListOfLocations(updatedList);
-};
-
-//Function to export location list as JSON
-const exportLocations = () => {
-    const dat = JSON.stringify(lostOfLocations);
-    const blog = new Blob([data], {type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "locations.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-};
-
-// Function to import location list from JSON
-const importLocations = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const importedData = JSON.parse(e.target.result);
-        console.log (
-            "importedData",
-            importedData,
-            "listOfLocations",
-            listOfLocations
-        );
-        setListOfLocations([...listOfLocations, ...importedData]);
-    };
-    reader.readAsText(file);
-};
-
-return (
+  return isLoaded ? (
     <>
-    <div className="map-container">
+      <div className="map-container">
         <GoogleMap
-        style={{ borderRadius: "20px" }}
-        defaultZoom={13}
-        defaultCenter={markerLocation}
-        gestureHandling={"greedy"}
-        disableDefaulUI
-        onClick={(mapProps) => handleMapClick(mapProps)}
+          mapContainerStyle={containerStyle}
+          center={center}
+          zoom={13}
+          options={{
+            gestureHandling: "greedy",
+            disableDefaultUI: true,
+          }}
+          onClick={handleMapClick}
         >
-            {showDialog && (
-                // display a dialog to add click location
-                <InfoWindow position={dialogLocation}>
-                    <button className="app-button" onClick={onAddLocation}>
-                        Add this location
-                    </button>
-                </InfoWindow>
-            )}
-            <Marker position={markerLocation} />
-        </GoogleMap>
-    </div>
-    <div className="list-container">
-        {/* checks the location of list is not empty */}
-        {listOfLocations.length > 0 ? (
-            <div>
-                <p className="list-heading"> List of Selected Locations</p>
-                {/* //display stored locations */}
-                {listOfLocations.map((loc) => {
-                    return (
-                        <div 
-                        key={loc.location.lat + loc.location.lng}
-                        className="list-item"
-                        >
-                            <p className="latLng-text"> {loc.name}</p>
-                            <div style={{ display: "flex" }}>
-                                <AppButton handleClick={() => onViewLocaton(loc.location)}>
-                                    View
-                                </AppButton>
-                                <AppButton 
-                                handleClick={() => onDeleteLocation(loc.location)}
-                                >
-                                    Delete
-                                </AppButton>
-                            </div>
-                            </div>
-                    );
-                })}
-                {/* display export and import options*/}
-                <div className="list-footer">
-                    <AppButton handleClick={esportLocations}>
-                        Export Locations
-                    </AppButton>
-                    <input
-                    className="app-button"
-                    type="file"
-                    accept=".json"
-                    onChange={importLocations}
-                    />
-                </div>
-                </div>
-        ) : (
-            // display text message to select location
-            <div>
-                <p className="list-heading">
-                    Select a location from map to show in a list or import JSON file
-                </p>
-                <div className="list-footer">
-                    <input
-                    className="app-button"
-                    type="file"
-                    accept=".json"
-                    onChange={importLocations}
-                    />
-            </div>
-            </div>
-        )}
-    </div>
-    </>
-);
+          {showDialog && (
+            <InfoWindow
+              position={dialogLocation}
+              onCloseClick={() => setShowDialog(false)}
+            >
+              <div style={{ maxWidth: "200px" }}>
+                <input
+                  type="text"
+                  className="map-input"
+                  placeholder="Add notes"
+                  value={treeTypeInput}
+                  onChange={(e) => setTreeTypeInput(e.target.value)}
+                  style={{ width: "100%", marginBottom: "8px" }}
+                />
 
-export default MapComponent
+                <select
+                  className="map-input"
+                  value={selectedFruitTypeId}
+                  onChange={(e) => setSelectedFruitTypeId(e.target.value)}
+                  style={{ width: "100%", marginBottom: "8px" }}
+                >
+                  <option value="">Select fruit type</option>
+                  {fruitTypes.map((fruit) => (
+                    <option key={fruit.id} value={fruit.id}>
+                      {fruit.fruit_name}
+                    </option>
+                  ))}
+                </select>
+
+                <button className="app-button" onClick={onAddTree}>
+                  Add this tree
+                </button>
+              </div>
+            </InfoWindow>
+          )}
+
+          {listOfTrees.map((tree, idx) => (
+            <Marker
+              key={idx}
+              position={{ lat: tree.lat, lng: tree.lng }}
+              icon={{
+                url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+                scaledSize: new window.google.maps.Size(40, 40),
+              }}
+            />
+          ))}
+        </GoogleMap>
+      </div>
+
+      <div className="list-container">
+        <TreeListComponent trees={listOfTrees} />
+      </div>
+    </>
+  ) : (
+    <p>Loading Map...</p>
+  );
+};
+
+export default MapComponent;

@@ -1,0 +1,48 @@
+.map-layout {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+    flex-wrap: wrap; 
+  }
+  
+  .map-container {
+    flex: 1;
+    min-width: 300px;
+    height: auto;
+    border: 2px solid black;
+    border-radius: 20px;
+  }
+  
+  .list-container {
+    flex: 1;
+    min-width: 300px;
+    max-height: 600px;
+    overflow-y: auto;
+    border: 2px solid black;
+    border-radius: 20px;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+  .map-input {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    
+  }
+
+@media screen and (max-width: 768px) {
+  .map-layout {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .map-container,
+  .list-container {
+    width: 100%;
+    height: auto;
+  }
+}
+  

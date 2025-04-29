@@ -11,8 +11,9 @@ import * as yup from 'yup';
 
 
 
-function UserLogin({ setUser }) {
+function UserLogin() {
   const [signup, setSignUp] = useState(true);
+  const [user, setUser] = useState(null);
 
 
   // Toggle between login/signup
@@ -51,7 +52,7 @@ function UserLogin({ setUser }) {
 
   // Handle form submission
   const handleFormSubmit = (values) => {
-    const endpoint = signup ? '/user' : '/login';
+    const endpoint = signup ? '/users' : '/login';
 
     const payload = signup
       ? {
@@ -157,14 +158,14 @@ function UserLogin({ setUser }) {
               />
             )}
 
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit'}
-              </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit'}
+            </Button>
 
           </Box>
         )}

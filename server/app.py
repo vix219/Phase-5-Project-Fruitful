@@ -22,12 +22,33 @@ api = Api(app)
 def index():
     return '<h1>Project Server</h1>'
 
-class User(Resource):
-    def get_user(self):
+class UserResource(Resource):
+    def get(self):
         users = db.session.execute(db.select(User)).scalars().all()
         users_list = [user.to_dict() for user in users]
-        print("Session after login:", dict(session))
         return make_response({'User': users_list}, 200)
+
+    def post(self):
+        data = request.get_json()
+        try:
+            username = data.get('username')
+            email = data.get('email')
+            password = data.get('password')
+
+            if not all([username, email, password]):
+                return {'error': 'Missing required fields'}, 400
+
+            new_user = User(username=username, email=email)
+            new_user.password_hash = password  # assumes User model has a setter for this
+            db.session.add(new_user)
+            db.session.commit()
+
+            session['user_id'] = new_user.id
+            return make_response(new_user.to_dict(), 201)
+
+        except Exception as e:
+            return {'error': str(e)}, 400
+
 
 
 class Login(Resource):
@@ -48,22 +69,31 @@ class Logout(Resource):
         return make_response({}, 204)
 
 class Tree(Resource):
-    def get_trees(self):
-        trees = db.sesssion.execute(db.select(Tree)).scalars().all()
+    def get(self):
+        trees = db.session.execute(db.select(Tree)).scalars().all()
         return make_response([tree.to_dict() for tree in trees], 200)
 
-    def add_tree(self):
+    def post(self):
         params = request.json
         try:
-            if not params.get('name'):
-             return make_response({'error': ['Missing required field']}, 400)
-        
-            tree = Tree(name=params['name'])
+            required_fields = ['lat', 'lng', 'user_id', 'fruit_type_id']
+            for field in required_fields:
+                if not params.get(field):
+                    return make_response({'error': f'Missing {field}'}, 400)
+
+            tree = Tree(
+                lat=params['lat'],
+                lng=params['lng'],
+                user_id=params['user_id'],
+                fruit_type_id=params['fruit_type_id'],
+                notes=params.get('notes', '')
+            )
             db.session.add(tree)
             db.session.commit()
-            return jsonify({'success': True, 'id': tree.id}, 201)
+            return jsonify({'success': True, 'id': tree.id}), 201
         except Exception as e:
             return make_response({'errors': [str(e)]}, 400)
+
     
 
 class TreeByIdResource(Resource):
@@ -96,8 +126,7 @@ class TreeByIdResource(Resource):
         except NoResultFound:
             return make_response({'error': 'Tree not found'}, 404)
 
-        
-
+    
 
 class FruitTypeList(Resource):
     def get(self):
@@ -105,8 +134,8 @@ class FruitTypeList(Resource):
         return [fruit.to_dict() for fruit in fruit_types], 200
 
 api.add_resource(FruitTypeList, '/fruit-type')
-api.add_resource(User, '/users')
-api.add_resource(Login, '/user/login')
+api.add_resource(UserResource, '/users')
+api.add_resource(Login, '/users/login')
 api.add_resource(Logout, '/user/logout')
 api.add_resource(Tree, '/trees')
 api.add_resource(TreeByIdResource, '/trees/<int:id>')
