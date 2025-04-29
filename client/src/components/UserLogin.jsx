@@ -5,38 +5,19 @@ import {
   Button,
   Typography,
   Box,
-  Snackbar
 } from '@mui/material';
-import MuiAlert from '@mui/material/Alert';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 
-// Snackbar Alert wrapper
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+
 
 function UserLogin({ setUser }) {
   const [signup, setSignUp] = useState(true);
-  const [snackOpen, setSnackOpen] = useState(false);
-  const [snackMessage, setSnackMessage] = useState('');
-  const [snackSeverity, setSnackSeverity] = useState('success');
+
 
   // Toggle between login/signup
   const toggleFormMode = () => {
     setSignUp(prev => !prev);
-  };
-
-  // Snackbar utility
-  const showSnackbar = (message, severity = 'success') => {
-    setSnackMessage(message);
-    setSnackSeverity(severity);
-    setSnackOpen(true);
-  };
-
-  const handleSnackClose = (_, reason) => {
-    if (reason === 'clickaway') return;
-    setSnackOpen(false);
   };
 
   // Yup validation schemas
@@ -83,29 +64,26 @@ function UserLogin({ setUser }) {
           password: values.password,
         };
 
-    fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload),
-    })
+        fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        })
       .then(response => {
         if (response.ok) {
           response.json().then(user => {
             localStorage.setItem('loggedInUser', JSON.stringify(user));
             setUser(user);
-            showSnackbar(`Welcome, ${user.username}!`, 'success');
           });
         } else {
           response.json().then(data => {
             const errorMessage = data.error || 'Login/Register failed';
-            showSnackbar(errorMessage, 'error');
           });
         }
       })
       .catch(err => {
         console.error('Network error:', err);
-        showSnackbar('Network error. Please try again.', 'error');
       });
   };
 
@@ -179,28 +157,20 @@ function UserLogin({ setUser }) {
               />
             )}
 
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit'}
-            </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </Button>
+
           </Box>
         )}
       </Formik>
 
-      <Snackbar
-        open={snackOpen}
-        autoHideDuration={4000}
-        onClose={handleSnackClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={handleSnackClose} severity={snackSeverity} sx={{ width: '100%' }}>
-          {snackMessage}
-        </Alert>
-      </Snackbar>
+    
     </Container>
   );
 }

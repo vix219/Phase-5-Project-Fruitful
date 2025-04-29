@@ -1,37 +1,84 @@
-.fruit-card {
-  
-    padding: 10px 10px;
-    background-color: #f4f3f2; 
-  }
-  
-  .fruit-card h4 {
-    font-size: 20pt;
-    text-align: center;
-    margin-bottom: 20px;
-    color: white;
-  }
-  
+/* Container to hold all fruit cards */
+.fruit-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  justify-items: center;
+}
 
+/* Individual fruit card */
 .fruit-card {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    background-color: white;
-    padding: 20px;
-    margin: 15px;
-    border-radius: 2px;
-    width: 250px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .fruit-card img {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 400px;
+  margin: 20px auto;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.read-more-btn {
+  background-color: #438d6d; 
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.read-more-btn:hover {
+  background-color: #161817;
+}
+
+
+.fruit-card .h4 {
+  font-size: 18pt;
+  margin-bottom: 2%;
+  color: #333;
+}
+
+.fruit-card img {
+  max-width: 100%;
+  border-radius: 50%;
+}
+
+.fruit-card .p1 {
+  margin-bottom:inherit;
+  font-size: medium;
+}
+
+.fruit-card .p2 {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.5;
+  overflow-y: auto;  
+  max-height: 200px;
+}
+
+
+.text-wrapper {
+ 
+  overflow: hidden;
+  transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out;
+  opacity: 0.8;
+  padding: 5px 0;
+}
+
+.text-wrapper.expanded {
+  opacity: 1;
+  padding: 10px 0;
+}
+
+
+@media (max-width: 600px) {
+  .fruit-card {
     max-width: 100%;
-    border-radius: 50%;
   }
-  
-  .fruit-card p {
-    text-align: center;
-    margin-top: 10px;
-    font-size: medium;
+
+  .read-more-btn {
+    width: 100%;
   }
-  
+}

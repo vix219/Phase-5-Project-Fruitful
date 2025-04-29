@@ -6,6 +6,7 @@ import React from "react";
 import HomePage from "./HomePage";
 import Map from "./Map";
 import FruitType from "./FruitType";
+import UserLogin from "./UserLogin";
 
 
 
@@ -13,6 +14,7 @@ function App() {
   return (
     <div className="main-container">
       <HomePage />
+      <UserLogin/>
       <Map />
       <FruitType/>
     </div>
