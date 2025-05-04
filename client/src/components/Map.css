@@ -1,3 +1,5 @@
+Map CSS
+
 .map-layout {
     display: flex;
     gap: 2rem;
@@ -24,13 +26,25 @@
     box-sizing: border-box;
   }
   .map-input {
-    padding: 10px 15px;
+    padding: 6px;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    border: 1px solid #ccc;
     outline: none;
     transition: border-color 0.3s, box-shadow 0.3s;
     
+  }
+  .app-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .app-button:hover {
+    background-color: #218838;
   }
 
 @media screen and (max-width: 768px) {

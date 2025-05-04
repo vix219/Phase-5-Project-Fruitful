@@ -14,7 +14,7 @@ function FruitType() {
   };
 
   const fetchFruits = () => {
-    fetch("http://localhost:5555/fruit-type")
+    fetch("fruit-type")
       .then((resp) => {
         if (!resp.ok) {
           throw new Error("Network response was not ok");

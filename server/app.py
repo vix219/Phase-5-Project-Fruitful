@@ -6,7 +6,7 @@ from flask_restful import Resource
 from sqlalchemy.exc import NoResultFound
 from datetime import datetime
 from flask_cors import CORS 
-
+import logging
 
 # Local imports
 from config import app, db, api
@@ -14,7 +14,11 @@ from models import Tree, User, FruitType
 from flask_restful import Api
 api = Api(app)
 
+# Enable CORS
+CORS(app, supports_credentials=True)
 
+# Setup basic logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Views go here!
 
@@ -39,7 +43,7 @@ class UserResource(Resource):
                 return {'error': 'Missing required fields'}, 400
 
             new_user = User(username=username, email=email)
-            new_user.password_hash = password  # assumes User model has a setter for this
+            new_user.password_hash = password  # Uses the setter to hash the password
             db.session.add(new_user)
             db.session.commit()
 
@@ -47,10 +51,19 @@ class UserResource(Resource):
             return make_response(new_user.to_dict(), 201)
 
         except Exception as e:
+            logging.error(f"Error in creating user: {str(e)}")
             return {'error': str(e)}, 400
-
-
-
+        
+class CurrentUser(Resource):
+    def get(self):
+        user_id = session.get('user_id')
+        if not user_id:
+            return make_response({'error': 'Unauthorized'}, 401)
+        user = User.query.get(user_id)
+        if not user:
+            return make_response({'error': 'User not found'}, 404)
+        return make_response(user.to_dict(), 200)
+        
 class Login(Resource):
     def post(self):
         params = request.json
@@ -58,7 +71,7 @@ class Login(Resource):
         if not user:
             return make_response({'error': 'User not found'}, 404)
         if user.authenticate(params.get('password')):
-            session ['user_id'] = user.id
+            session['user_id'] = user.id
             return make_response(user.to_dict())
         else:
             return make_response({'error': 'Invalid username or password'}, 401)
@@ -68,13 +81,14 @@ class Logout(Resource):
         session.pop('user_id', None)
         return make_response({}, 204)
 
-class Tree(Resource):
+class TreeListResource(Resource):
     def get(self):
-        trees = db.session.execute(db.select(Tree)).scalars().all()
+        trees = Tree.query.all()
         return make_response([tree.to_dict() for tree in trees], 200)
 
     def post(self):
         params = request.json
+
         try:
             required_fields = ['lat', 'lng', 'user_id', 'fruit_type_id']
             for field in required_fields:
@@ -92,41 +106,45 @@ class Tree(Resource):
             db.session.commit()
             return jsonify({'success': True, 'id': tree.id}), 201
         except Exception as e:
+            logging.error(f"Error creating tree: {str(e)}")
             return make_response({'errors': [str(e)]}, 400)
-
-    
 
 class TreeByIdResource(Resource):
     def get(self, id):
         try:
-            tree = db.session.execute(db.select(Tree).filter_by(id=id)).scalar_one()
+            tree = Tree.query.get(id)
+            if not tree:
+                return make_response({'error': 'Tree not found'}, 404)
             return make_response(tree.to_dict(), 200)
-        except NoResultFound:
-            return make_response({'error': 'Tree not found'}, 404)
+        except Exception as e:
+            logging.error(f"Error fetching tree by ID: {str(e)}")
+            return make_response({'error': str(e)}, 400)
 
     def put(self, id):
         try:
-            tree = db.session.execute(db.select(Tree).filter_by(id=id)).scalar_one()
+            tree = Tree.query.get(id)
+            if not tree:
+                return make_response({'error': 'Tree not found'}, 404)
             params = request.json
             for key, value in params.items():
                 setattr(tree, key, value)
             db.session.commit()
             return make_response(tree.to_dict(), 200)
-        except NoResultFound:
-            return make_response({'error': 'Tree not found'}, 404)
         except Exception as e:
+            logging.error(f"Error updating tree by ID: {str(e)}")
             return make_response({'errors': [str(e)]}, 400)
 
     def delete(self, id):
         try:
-            tree = db.session.execute(db.select(Tree).filter_by(id=id)).scalar_one()
+            tree = Tree.query.get(id)
+            if not tree:
+                return make_response({'error': 'Tree not found'}, 404)
             db.session.delete(tree)
             db.session.commit()
             return make_response({}, 204)
-        except NoResultFound:
-            return make_response({'error': 'Tree not found'}, 404)
-
-    
+        except Exception as e:
+            logging.error(f"Error deleting tree: {str(e)}")
+            return make_response({'errors': [str(e)]}, 400)
 
 class FruitTypeList(Resource):
     def get(self):
@@ -135,18 +153,13 @@ class FruitTypeList(Resource):
 
 api.add_resource(FruitTypeList, '/fruit-type')
 api.add_resource(UserResource, '/users')
+api.add_resource(CurrentUser, '/current-user')
+
 api.add_resource(Login, '/users/login')
-api.add_resource(Logout, '/user/logout')
-api.add_resource(Tree, '/trees')
+api.add_resource(Logout, '/users/logout')
+api.add_resource(TreeListResource, '/trees')
 api.add_resource(TreeByIdResource, '/trees/<int:id>')
-
-
-
-
-
-
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
-
 

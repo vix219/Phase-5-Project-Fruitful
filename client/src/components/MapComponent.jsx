@@ -1,13 +1,8 @@
-// components/MapComponent.js
-
 import React, { useState, useEffect } from "react";
-import {
-  GoogleMap,
-  Marker,
-  InfoWindow,
-  useJsApiLoader,
-} from "@react-google-maps/api";
+import { GoogleMap, Marker, InfoWindow } from "@react-google-maps/api";
+import { Loader } from "@googlemaps/js-api-loader";
 import TreeListComponent from "./TreeListComponent";
+import { useUser } from './UserContext'; 
 import "./Map.css";
 
 const containerStyle = {
@@ -22,11 +17,10 @@ const center = {
 };
 
 const MapComponent = () => {
-  const { isLoaded } = useJsApiLoader({
-    id: "google-map-script",
-    googleMapsApiKey: "AIzaSyCfzg5rgZRzJOZ6JdhXDkukRLz0F1WEwvg", 
-  });
+  const { user } = useUser(); 
+  const userId = user?.id;
 
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [dialogLocation, setDialogLocation] = useState(null);
   const [listOfTrees, setListOfTrees] = useState([]);
@@ -35,14 +29,26 @@ const MapComponent = () => {
   const [fruitTypes, setFruitTypes] = useState([]);
   const [selectedFruitTypeId, setSelectedFruitTypeId] = useState("");
 
-  // Fetch trees and fruit types on load
   useEffect(() => {
-    fetch("http://localhost:5555/trees")
+    const loader = new Loader({
+      apiKey: process.env.REACT_APP_API_KEY || "",
+      version: "weekly",
+    });
+
+    loader.load().then(() => {
+      setIsMapLoaded(true);
+    }).catch(err => {
+      console.error("Google Maps failed to load:", err);
+    });
+  }, []);
+
+  useEffect(() => {
+    fetch("/trees", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setListOfTrees(data))
       .catch((err) => console.error("Error fetching trees:", err));
 
-    fetch("http://localhost:5555/fruit-type")
+    fetch("/fruit-type", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setFruitTypes(data))
       .catch((err) => console.error("Error fetching fruit types:", err));
@@ -51,28 +57,24 @@ const MapComponent = () => {
   const handleMapClick = (e) => {
     const lat = e.latLng.lat();
     const lng = e.latLng.lng();
-    const location = { lat, lng };
-
-    setSelectedLocation(location);
-    setDialogLocation(location);
+    setSelectedLocation({ lat, lng });
+    setDialogLocation({ lat, lng });
     setShowDialog(true);
   };
 
   const onAddTree = async () => {
-    if (!selectedFruitTypeId) {
-      alert("Please select a fruit type.");
+    if (!selectedFruitTypeId || !userId || !selectedLocation) {
+      alert("Please select a fruit type and ensure you're logged in.");
       return;
     }
 
     const geoCoder = new window.google.maps.Geocoder();
     geoCoder.geocode({ location: selectedLocation }, async (results, status) => {
       if (status === "OK" && results[0]) {
-       
-
         const newTree = {
           lat: selectedLocation.lat,
           lng: selectedLocation.lng,
-          user_id: 1, // Replace with user ID
+          user_id: userId,
           fruit_type_id: parseInt(selectedFruitTypeId),
           notes: treeTypeInput,
         };
@@ -83,16 +85,17 @@ const MapComponent = () => {
             headers: {
               "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify(newTree),
           });
 
+          const responseData = await response.json();
+
           if (!response.ok) {
-            const errorData = await response.json();
-            alert("Failed to add tree: " + JSON.stringify(errorData));
+            alert("Failed to add tree: " + JSON.stringify(responseData));
             return;
           }
 
-          const responseData = await response.json();
           setListOfTrees([...listOfTrees, { ...newTree, id: responseData.id }]);
           setShowDialog(false);
           setTreeTypeInput("");
@@ -106,7 +109,7 @@ const MapComponent = () => {
     });
   };
 
-  return isLoaded ? (
+  return isMapLoaded ? (
     <>
       <div className="map-container">
         <GoogleMap
@@ -120,10 +123,7 @@ const MapComponent = () => {
           onClick={handleMapClick}
         >
           {showDialog && (
-            <InfoWindow
-              position={dialogLocation}
-              onCloseClick={() => setShowDialog(false)}
-            >
+            <InfoWindow position={dialogLocation} onCloseClick={() => setShowDialog(false)}>
               <div style={{ maxWidth: "200px" }}>
                 <input
                   type="text"

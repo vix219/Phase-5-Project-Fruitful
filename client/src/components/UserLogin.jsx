@@ -1,24 +1,18 @@
 import React, { useState } from 'react';
-import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Box,
-} from '@mui/material';
+import { Container, TextField, Button, Typography, Box } from '@mui/material';
 import { Formik } from 'formik';
 import * as yup from 'yup';
-
-
+import { useNavigate } from 'react-router-dom';
 
 function UserLogin() {
   const [signup, setSignUp] = useState(true);
-  const [user, setUser] = useState(null);
-
+  const [error, setError] = useState(null);
+  const navigate = useNavigate(); // For redirecting after login or signup
 
   // Toggle between login/signup
   const toggleFormMode = () => {
     setSignUp(prev => !prev);
+    setError(null); // Clear error on toggle
   };
 
   // Yup validation schemas
@@ -51,9 +45,10 @@ function UserLogin() {
   };
 
   // Handle form submission
-  const handleFormSubmit = (values) => {
-    const endpoint = signup ? '/users' : '/login';
+  const handleFormSubmit = (values, { setSubmitting, resetForm }) => {
+    setError(null);
 
+    const endpoint = signup ? '/users' : '/users/login';
     const payload = signup
       ? {
           username: values.username,
@@ -65,26 +60,32 @@ function UserLogin() {
           password: values.password,
         };
 
-        fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(payload),
-        })
+    fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    })
       .then(response => {
         if (response.ok) {
-          response.json().then(user => {
-            localStorage.setItem('loggedInUser', JSON.stringify(user));
-            setUser(user);
+          return response.json().then(user => {
+            localStorage.setItem('loggedInUser', JSON.stringify(user)); // Store user in localStorage
+            resetForm();
+            navigate('/portal'); // Redirect to the user portal after successful login/signup
+            alert(`${signup ? 'Registration' : 'Login'} successful!`);
           });
         } else {
-          response.json().then(data => {
-            const errorMessage = data.error || 'Login/Register failed';
+          return response.json().then(data => {
+            setError(data.error || 'Login/Register failed');
           });
         }
       })
       .catch(err => {
         console.error('Network error:', err);
+        setError('A network error occurred. Please try again later.');
+      })
+      .finally(() => {
+        setSubmitting(false);
       });
   };
 
@@ -97,6 +98,12 @@ function UserLogin() {
       <Button variant="text" onClick={toggleFormMode} sx={{ mb: 2 }}>
         {signup ? 'Already have an account? Login' : 'Need an account? Register'}
       </Button>
+
+      {error && (
+        <Typography color="error" align="center" sx={{ mb: 2 }}>
+          {error}
+        </Typography>
+      )}
 
       <Formik
         enableReinitialize
@@ -119,6 +126,7 @@ function UserLogin() {
               onChange={handleChange}
               error={touched.username && Boolean(errors.username)}
               helperText={touched.username && errors.username}
+              autoComplete="username"
             />
 
             {signup && (
@@ -131,6 +139,7 @@ function UserLogin() {
                 onChange={handleChange}
                 error={touched.email && Boolean(errors.email)}
                 helperText={touched.email && errors.email}
+                autoComplete="email"
               />
             )}
 
@@ -143,6 +152,7 @@ function UserLogin() {
               onChange={handleChange}
               error={touched.password && Boolean(errors.password)}
               helperText={touched.password && errors.password}
+              autoComplete={signup ? 'new-password' : 'current-password'}
             />
 
             {signup && (
@@ -155,6 +165,7 @@ function UserLogin() {
                 onChange={handleChange}
                 error={touched.passwordConfirmation && Boolean(errors.passwordConfirmation)}
                 helperText={touched.passwordConfirmation && errors.passwordConfirmation}
+                autoComplete="new-password"
               />
             )}
 
@@ -164,16 +175,14 @@ function UserLogin() {
               color="primary"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit'}
+              {isSubmitting ? 'Submitting...' : signup ? 'Register' : 'Login'}
             </Button>
-
           </Box>
         )}
       </Formik>
-
-    
     </Container>
   );
 }
 
 export default UserLogin;
+

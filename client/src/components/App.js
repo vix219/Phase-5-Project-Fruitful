@@ -1,27 +1,33 @@
+// src/components/App.js
+
 import "../HomePage.css";
 import "../FruitType.css";
-import React from "react";
-// import React, { useEffect, useState } from "react";
-// import { Outlet } from "react-router-dom";
 import HomePage from "./HomePage";
-// import Map from "./Map";
 import FruitType from "./FruitType";
 import UserLogin from "./UserLogin";
-import { LoadScript } from "@react-google-maps/api"
 import MapComponent from "./MapComponent";
-
-
+import UserPortal from "./UserPortal";
+import { useUser } from './UserContext';
+import React, { useEffect } from "react";
+import NavBar from "./NavBar";
+import { Outlet } from "react-router-dom"; // Import Outlet from react-router-dom
 
 function App() {
+  const { setUser } = useUser();
+
+  useEffect(() => {
+    fetch('/current-user', { credentials: 'include' })
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => setUser(data))
+      .catch(() => console.log('Not logged in'));
+  }, [setUser]);
+
   return (
     <div className="main-container">
-      <HomePage />
-      <UserLogin/>
-      <LoadScript googleMapsApiKey="AIzaSyCfzg5rgZRzJOZ6JdhXDkukRLz0F1WEwvg">
-        <MapComponent/>
-      </LoadScript>
-      {/* <Map /> */}
-      <FruitType/>
+      <NavBar /> {/* Include NavBar */}
+      
+      {/* Render the route-specific content here */}
+      <Outlet />
     </div>
   );
 }

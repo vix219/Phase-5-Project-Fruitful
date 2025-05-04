@@ -27,8 +27,11 @@ class Tree(db.Model, SerializerMixin):
     fruit_type = db.relationship('FruitType', back_populates='trees')
     user = db.relationship('User', back_populates='trees')
 
-    def __repr__(self):
-        return f"<Tree {self.name}>"
+    serialize_rules = ('-user._password_hash', '-user.trees', '-fruit_type.trees')
+
+def __repr__(self):
+    return f"<Tree {self.id}>"
+
 
 
 
@@ -71,19 +74,14 @@ class User(db.Model, SerializerMixin):
     def password_hash(self, password):
         self._password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
-
-    @validates('email')
-    def validate_email(self, key, value):
-        if value and '@' not in value:
-            raise ValueError('Invalid email address.')
-        return value
-
     # Password checking on login
     def authenticate(self, password):
         return check_password_hash(self._password_hash, password)
     
     def __repr__(self):
         return f"<User {self.username}>"
+
+
 
 
 
