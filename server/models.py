@@ -42,14 +42,13 @@ class Tree(db.Model, SerializerMixin):
             'fruit_type_id': self.fruit_type_id,
             'notes': self.notes,
             'address': self.address,
-            'fruit_type': self.fruit_type.to_dict() if self.fruit_type else {"fruit_name": "Unknown Fruit"},  # Handle missing fruit type
+            'fruit_type': self.fruit_type.to_dict() if self.fruit_type else {"fruit_name": "Unknown Fruit"},
             'user': self.user.to_dict() if self.user else None
         }
 
 
 class FruitType(db.Model, SerializerMixin):
     __tablename__ =  'fruit_types'
-    # ipdb.set_trace()
     id = db.Column(db.Integer, primary_key=True)
     fruit_name = db.Column(db.String, nullable=False)
     image_url = db.Column(db.String, nullable=False)
@@ -70,7 +69,6 @@ class User(db.Model, SerializerMixin):
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     trees = db.relationship('Tree', back_populates='user', cascade='all, delete-orphan')
-    # trees = db.relationship('Tree', back_populates='user')
 
     @validates('email')
     def validate_email(self, key, value):
@@ -93,7 +91,28 @@ class User(db.Model, SerializerMixin):
     def __repr__(self):
         return f"<User {self.username}>"
 
+class ForumPost(db.Model, SerializerMixin):
+    __tablename__ = 'forum_posts'
 
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Nullable for guest posts
+    title = db.Column(db.String(150), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    user = db.relationship('User', backref='forum_posts')
 
+    serialize_rules = ('-user._password_hash', '-user.trees',)
 
+    def __repr__(self):
+        return f"<ForumPost {self.title[:20]}...>"
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'title': self.title,
+            'content': self.content,
+            'created_at': self.created_at.isoformat(),
+            'user': self.user.to_dict() if self.user else None
+        }

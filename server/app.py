@@ -10,7 +10,7 @@ import logging
 
 # Local imports
 from config import app, db, api
-from models import Tree, User, FruitType
+from models import Tree, User, FruitType, ForumPost
 from flask_restful import Api
 api = Api(app)
 
@@ -191,8 +191,31 @@ class FruitTypeById(Resource):
         db.session.commit()
         return {}, 204
 
+class ForumPostResource(Resource):
+    def get(self):
+        try:
+            posts = ForumPost.query.order_by(ForumPost.created_at.desc()).all()
+            return [post.to_dict() for post in posts], 200
+        except Exception as e:
+            print("Error fetching posts:", e)
+            return {"error": "Internal Server Error"}, 500
 
+    def post(self):
+        try:
+            data = request.get_json()
+            new_post = ForumPost(
+                user_id=data.get('user_id'),
+                title=data['title'],
+                content=data['content']
+            )
+            db.session.add(new_post)
+            db.session.commit()
+            return new_post.to_dict(), 201
+        except Exception as e:
+            print("Error creating post:", e)
+            return {"error": "Failed to create post"}, 400
 
+api.add_resource(ForumPostResource, '/forum_posts')
 api.add_resource(FruitTypeList, '/fruit-type')
 api.add_resource(FruitTypeById, '/fruit-type/<int:id>')
 api.add_resource(UserResource, '/users')

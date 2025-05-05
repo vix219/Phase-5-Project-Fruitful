@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Container, Typography, TextField, Button, Box, Paper, Grid, Divider } from '@mui/material';
+import { Container, Typography, TextField, Button, Box, Paper, Divider, FormControl, InputLabel, OutlinedInput } from '@mui/material';
 
 function UserPortal() {
   const [user, setUser] = useState(null);
@@ -17,7 +17,6 @@ function UserPortal() {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
-      // Prefill with user data if available
       setProfile({
         firstName: parsedUser.firstName || '',
         lastName: parsedUser.lastName || '',
@@ -35,9 +34,31 @@ function UserPortal() {
     }
   }, []);
 
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      const { firstName, lastName, bio } = JSON.parse(savedProfile);
+      setProfile({
+        firstName,
+        lastName,
+        bio,
+      });
+    }
+  }, []);
+
   const handleSaveTree = () => {
     localStorage.setItem('userTreeData', treeData);
     setSavedTree(treeData);
+  };
+
+  const handleSaveBio = () => {
+    const userProfile = {
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      bio: profile.bio,
+    };
+    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    alert('Profile saved!');
   };
 
   const handleProfileChange = (field) => (e) => {
@@ -68,47 +89,74 @@ function UserPortal() {
         <Divider sx={{ my: 3 }} />
 
         {/* Profile Information */}
-<Typography variant="h6" gutterBottom>
-  User Profile
-</Typography>
+        <Typography variant="h6" gutterBottom>
+          User Profile
+        </Typography>
 
         {/* User profile info */}
         <Box
           sx={{
             display: 'grid',
-            gap: 2,
+            gap: 3,
             gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+            mb: 4,
           }}
         >
-          <TextField
-            label="First Name"
-            fullWidth
-            value={profile.firstName}
-            onChange={handleProfileChange('firstName')}
-          />
-          <TextField
-            label="Last Name"
-            fullWidth
-            value={profile.lastName}
-            onChange={handleProfileChange('lastName')}
-          />
-          <TextField
-            label="Phone Number"
-            fullWidth
-            value={profile.phone}
-            onChange={handleProfileChange('phone')}
-            sx={{ gridColumn: { sm: 'span 1', xs: 'span 2' } }}
-          />
-          <TextField
-            label="Short Bio"
-            multiline
-            rows={3}
-            fullWidth
-            value={profile.bio}
-            onChange={handleProfileChange('bio')}
-            sx={{ gridColumn: 'span 2' }}
-          />
+          <FormControl fullWidth variant="outlined">
+            <InputLabel htmlFor="firstName">First Name</InputLabel>
+            <OutlinedInput
+              id="firstName"
+              value={profile.firstName}
+              onChange={handleProfileChange('firstName')}
+              label="First Name"
+            />
+          </FormControl>
+
+          <FormControl fullWidth variant="outlined">
+            <InputLabel htmlFor="lastName">Last Name</InputLabel>
+            <OutlinedInput
+              id="lastName"
+              value={profile.lastName}
+              onChange={handleProfileChange('lastName')}
+              label="Last Name"
+            />
+          </FormControl>
+
+          <FormControl fullWidth variant="outlined">
+            <InputLabel htmlFor="bio">Short Bio</InputLabel>
+            <OutlinedInput
+              id="bio"
+              value={profile.bio}
+              onChange={handleProfileChange('bio')}
+              label="Short Bio"
+              multiline
+              rows={4}
+              sx={{ gridColumn: 'span 2' }}
+            />
+          </FormControl>
         </Box>
+
+        {/* Save Bio Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ mt: 2, width: '100%' }}
+          onClick={handleSaveBio}
+        >
+          Save Profile
+        </Button>
+
+        {/* Display Saved Profile */}
+        {profile.firstName && profile.lastName && profile.bio && (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h6">Your Profile:</Typography>
+            <Paper sx={{ p: 2, backgroundColor: '#f9f9f9', whiteSpace: 'pre-wrap' }}>
+              <strong>Name:</strong> {profile.firstName} {profile.lastName}
+              <br />
+              <strong>Bio:</strong> {profile.bio}
+            </Paper>
+          </Box>
+        )}
 
         {/* Tree Data Section */}
         <Typography variant="h6" gutterBottom>
@@ -121,6 +169,7 @@ function UserPortal() {
           fullWidth
           value={treeData}
           onChange={(e) => setTreeData(e.target.value)}
+          sx={{ mb: 2 }}
         />
 
         <Button

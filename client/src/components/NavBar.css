@@ -1,28 +1,45 @@
 /* src/components/NavBar.css */
 nav {
   background-color: #333;
-  padding: 1rem;
-  
+  margin-left: 5%;
+  padding-left: 5%;
+  display: flex;
+  justify-content: space-between; /* Space between logo and menu */
+  align-items: center; /* Center items vertically */
 }
 
 nav ul {
   list-style: none;
   display: flex;
   gap: 20px;
+  margin: 0;
+  padding: 0;
+  justify-content: center; /* Center the list horizontally */
 }
 
 nav li {
+  padding-left: 5rem;
   margin: 0;
-  align-items: center;
+  display: flex; /* Ensures the link text stays on a single line */
+  align-items: center; /* Vertically centers the text inside the list item */
 }
 
 nav a {
   color: white;
   text-decoration: none;
   font-size: 1.2rem;
-  
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+  white-space: nowrap; /* Prevents the text from wrapping to a new line */
 }
 
 nav a:hover {
-  color: #ccc;
+  color: #77ba7b;
+  transform: scale(1.05);
+}
+
+nav a:focus {
+  outline:gold;
 }

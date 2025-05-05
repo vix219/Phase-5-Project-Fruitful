@@ -10,7 +10,7 @@ import UserPortal from "./UserPortal";
 import { useUser } from './UserContext';
 import React, { useEffect } from "react";
 import NavBar from "./NavBar";
-import { Outlet } from "react-router-dom"; // Import Outlet from react-router-dom
+import { Outlet } from "react-router-dom"; 
 
 function App() {
   const { setUser } = useUser();
@@ -24,9 +24,8 @@ function App() {
 
   return (
     <div className="main-container">
-      <NavBar /> {/* Include NavBar */}
-      
-      {/* Render the route-specific content here */}
+      <h2>Fruitful</h2>
+      <NavBar /> 
       <Outlet />
     </div>
   );

@@ -29,7 +29,7 @@ const MapComponent = () => {
   const [treeTypeInput, setTreeTypeInput] = useState("");
   const [fruitTypes, setFruitTypes] = useState([]);
   const [selectedFruitTypeId, setSelectedFruitTypeId] = useState("");
-  const [newTreeAddress, setNewTreeAddress] = useState(""); // Add state for the address
+  const [newTreeAddress, setNewTreeAddress] = useState(""); 
 
   // New Fruit Inputs
   const [newFruitName, setNewFruitName] = useState("");
@@ -255,7 +255,7 @@ const MapComponent = () => {
       </div>
 
       <div className="list-container">
-        <TreeListComponent trees={listOfTrees} />
+        <TreeListComponent trees={listOfTrees} setListOfTrees={setListOfTrees}  />
       </div>
 
       <div className="fruit-list-container">

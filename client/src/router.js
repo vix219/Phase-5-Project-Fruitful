@@ -6,13 +6,12 @@ import HomePage from "./components/HomePage";
 import UserLogin from "./components/UserLogin";
 import UserPortal from "./components/UserPortal";
 import MapComponent from "./components/MapComponent.jsx";
-// import TreeListComponent from "./components/TreeListComponent.jsx";
 import FruitType from "./components/FruitType.jsx";
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />, // App will render children components via <Outlet />
+    element: <App />, 
     children: [
       { index: true, element: <HomePage /> },
       { path: 'map', element: <MapComponent /> },
