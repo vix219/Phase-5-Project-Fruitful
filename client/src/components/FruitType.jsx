@@ -32,6 +32,26 @@ function FruitType() {
       });
   };
 
+  const handleDeleteFruit = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this fruit type?")) return;
+  
+    try {
+      const response = await fetch(`http://localhost:5555/fruit-type/${id}`, {
+        method: "DELETE",
+      });
+  
+      if (response.ok) {
+        setFruits(fruits.filter(fruit => fruit.id !== id));
+      } else {
+        const err = await response.json();
+        alert("Failed to delete fruit: " + (err.error || "Unknown error"));
+      }
+    } catch (err) {
+      console.error("Error deleting fruit type:", err);
+    }
+  };
+  
+
   useEffect(fetchFruits, []);
 
   if (loading) return <p>Loading...</p>;
@@ -60,6 +80,10 @@ function FruitType() {
               </div>
               <button onClick={() => toggleText(fruit.id)} className="read-more-btn">
                 {isExpanded ? 'Show Less' : 'Read More'}
+              </button>
+
+              <button onClick={() => handleDeleteFruit(fruit.id)} className="delete-btn" style={{ marginLeft: '10px', backgroundColor: 'red', color: 'white' }}>
+                Delete
               </button>
 
           </div>

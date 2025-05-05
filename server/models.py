@@ -23,16 +23,28 @@ class Tree(db.Model, SerializerMixin):
     lng = db.Column(db.Float, nullable=False)
     fruit_type_id = db.Column(db.Integer, db.ForeignKey('fruit_types.id'), nullable=False)
     notes = db.Column(db.String(200))
+    address = db.Column(db.String(255))  # Optional
 
     fruit_type = db.relationship('FruitType', back_populates='trees')
     user = db.relationship('User', back_populates='trees')
 
     serialize_rules = ('-user._password_hash', '-user.trees', '-fruit_type.trees')
 
-def __repr__(self):
-    return f"<Tree {self.id}>"
+    def __repr__(self):
+        return f"<Tree {self.id}>"
 
-
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'lat': self.lat,
+            'lng': self.lng,
+            'user_id': self.user_id,
+            'fruit_type_id': self.fruit_type_id,
+            'notes': self.notes,
+            'address': self.address,
+            'fruit_type': self.fruit_type.to_dict() if self.fruit_type else {"fruit_name": "Unknown Fruit"},  # Handle missing fruit type
+            'user': self.user.to_dict() if self.user else None
+        }
 
 
 class FruitType(db.Model, SerializerMixin):

@@ -74,6 +74,14 @@ Fruit CSS
   padding: 10px 0;
 }
 
+.delete-btn {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+
 
 @media (max-width: 600px) {
   .fruit-card {

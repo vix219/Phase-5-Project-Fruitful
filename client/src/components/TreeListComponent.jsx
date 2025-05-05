@@ -9,8 +9,10 @@ const TreeListComponent = ({ trees }) => {
       ) : (
         <ul>
           {trees.map((tree, idx) => (
-            <li key={idx}>
-              <strong>{tree.treeType}</strong> at {tree.name}
+            <li key={idx} style={{ marginBottom: "10px" }}>
+              <strong>{tree.fruit_name || "Unknown Fruit"}</strong><br />
+              <em>Address:</em> {tree.address || "Address not available"}<br />
+              <em>Notes:</em> {tree.notes || "No notes"}
             </li>
           ))}
         </ul>
@@ -20,4 +22,3 @@ const TreeListComponent = ({ trees }) => {
 };
 
 export default TreeListComponent;
-

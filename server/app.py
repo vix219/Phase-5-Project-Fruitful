@@ -87,9 +87,12 @@ class TreeListResource(Resource):
         return make_response([tree.to_dict() for tree in trees], 200)
 
     def post(self):
-        params = request.json
+        params = request.get_json()
+        if not params:
+            return make_response({'error': 'Invalid JSON'}, 400)
 
         try:
+            # Ensure required fields are present
             required_fields = ['lat', 'lng', 'user_id', 'fruit_type_id']
             for field in required_fields:
                 if not params.get(field):
@@ -100,14 +103,18 @@ class TreeListResource(Resource):
                 lng=params['lng'],
                 user_id=params['user_id'],
                 fruit_type_id=params['fruit_type_id'],
-                notes=params.get('notes', '')
+                notes=params.get('notes', ''),
+                address=params.get('address', '')  # Address is optional
             )
             db.session.add(tree)
             db.session.commit()
-            return jsonify({'success': True, 'id': tree.id}), 201
+
+            # Return tree data with a 201 status
+            return jsonify(tree.to_dict()), 201  # Use jsonify for proper JSON response
         except Exception as e:
             logging.error(f"Error creating tree: {str(e)}")
-            return make_response({'errors': [str(e)]}, 400)
+            return make_response({'error': f"Failed to add tree: {str(e)}"}, 500)
+
 
 class TreeByIdResource(Resource):
     def get(self, id):
@@ -151,10 +158,45 @@ class FruitTypeList(Resource):
         fruit_types = db.session.execute(db.select(FruitType)).scalars().all()
         return [fruit.to_dict() for fruit in fruit_types], 200
 
+    def post(self):
+        data = request.get_json()
+        try:
+            fruit_name = data.get('fruit_name')
+            image_url = data.get('image_url')
+            info = data.get('info')
+            season = data.get('season')
+
+            if not all([fruit_name, image_url, info, season]):
+                return {'error': 'All fields are required.'}, 400
+
+            new_fruit = FruitType(
+                fruit_name=fruit_name,
+                image_url=image_url,
+                info=info,
+                season=season
+            )
+            db.session.add(new_fruit)
+            db.session.commit()
+            return new_fruit.to_dict(), 201
+
+        except Exception as e:
+            return {'error': str(e)}, 400
+class FruitTypeById(Resource):
+    def delete(self, id):
+        fruit = FruitType.query.get(id)
+        if not fruit:
+            return {'error': 'Fruit type not found'}, 404
+
+        db.session.delete(fruit)
+        db.session.commit()
+        return {}, 204
+
+
+
 api.add_resource(FruitTypeList, '/fruit-type')
+api.add_resource(FruitTypeById, '/fruit-type/<int:id>')
 api.add_resource(UserResource, '/users')
 api.add_resource(CurrentUser, '/current-user')
-
 api.add_resource(Login, '/users/login')
 api.add_resource(Logout, '/users/logout')
 api.add_resource(TreeListResource, '/trees')

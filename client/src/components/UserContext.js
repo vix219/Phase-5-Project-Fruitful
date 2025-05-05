@@ -14,3 +14,4 @@ export const UserProvider = ({ children }) => {
 
 // Custom hook for convenience
 export const useUser = () => useContext(UserContext);
+
