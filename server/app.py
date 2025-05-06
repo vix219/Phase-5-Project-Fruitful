@@ -7,6 +7,7 @@ from sqlalchemy.exc import NoResultFound
 from datetime import datetime
 from flask_cors import CORS 
 import logging
+# import ipdb
 
 # Local imports
 from config import app, db, api
@@ -109,8 +110,9 @@ class TreeListResource(Resource):
             db.session.add(tree)
             db.session.commit()
 
+            # ipdb.set_trace()
             # Return tree data with a 201 status
-            return jsonify(tree.to_dict()), 201  # Use jsonify for proper JSON response
+            return make_response(tree.to_dict(), 201)  
         except Exception as e:
             logging.error(f"Error creating tree: {str(e)}")
             return make_response({'error': f"Failed to add tree: {str(e)}"}, 500)

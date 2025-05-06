@@ -113,7 +113,7 @@ const MapComponent = () => {
             return;
           }
 
-          setListOfTrees([...listOfTrees, { ...newTree, id: responseData.id }]);
+          setListOfTrees([...listOfTrees, responseData]);
           setShowDialog(false);
           setTreeTypeInput("");
           setSelectedFruitTypeId("");
@@ -173,8 +173,8 @@ const MapComponent = () => {
           }}
           onClick={handleMapClick}
         >
-          {showDialog && (
-            <InfoWindow position={dialogLocation} onCloseClick={() => setShowDialog(false)}>
+          {(showDialog && selectedLocation) && (
+            <InfoWindow position={selectedLocation} onCloseClick={() => setShowDialog(false)}>
               <div style={{ maxWidth: "250px" }}>
                 <input
                   type="text"

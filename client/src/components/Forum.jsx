@@ -1,14 +1,6 @@
 // Forum.js
 import React, { useEffect, useState } from 'react';
-import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Paper,
-  Box,
-  Divider,
-} from '@mui/material';
+import { Container, TextField, Button,  Typography, Paper, Box, Divider, } from '@mui/material';
 
 function Forum({ currentUserId = null }) {
   const [posts, setPosts] = useState([]);

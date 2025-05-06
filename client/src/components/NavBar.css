@@ -35,6 +35,20 @@ nav a {
   white-space: nowrap; /* Prevents the text from wrapping to a new line */
 }
 
+.nav .logout-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+
+}
+nav .logout-button:hover {
+  color: #77ba7b;
+  transform: scale(1.05);
+}
 nav a:hover {
   color: #77ba7b;
   transform: scale(1.05);
