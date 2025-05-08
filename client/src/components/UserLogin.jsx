@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, TextField, Button, Typography, Box } from '@mui/material';
 import { Formik } from 'formik';
 import * as yup from 'yup';
@@ -69,7 +69,11 @@ function UserLogin() {
       .then(response => {
         if (response.ok) {
           return response.json().then(user => {
-            localStorage.setItem('loggedInUser', JSON.stringify(user)); // Store user in localStorage
+            // Store user in localStorage with session expiration
+            const sessionExpiration = new Date().getTime() + 3600000; // 1 hour session expiration
+            const userWithExpiration = { ...user, sessionExpiration };
+            localStorage.setItem('loggedInUser', JSON.stringify(userWithExpiration)); // Store user with expiration
+
             resetForm();
             navigate('/portal'); // Redirect to the user portal after successful login/signup
             alert(`${signup ? 'Registration' : 'Login'} successful!`);
@@ -87,6 +91,30 @@ function UserLogin() {
       .finally(() => {
         setSubmitting(false);
       });
+  };
+
+  // Check if user session is valid
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem('loggedInUser');
+    if (loggedInUser) {
+      const parsedUser = JSON.parse(loggedInUser);
+      const currentTime = new Date().getTime();
+
+      // If session has expired, clear the user data from localStorage
+      if (currentTime > parsedUser.sessionExpiration) {
+        localStorage.removeItem('loggedInUser');
+        alert('Your session has expired. Please log in again.');
+      } else {
+        navigate('/portal'); // Redirect to portal if valid session
+      }
+    }
+  }, [navigate]);
+
+  // Logout function
+  const logout = () => {
+    localStorage.removeItem('loggedInUser');
+    navigate('/login'); // Redirect to login page after logout
+    alert('You have logged out successfully.');
   };
 
   return (
@@ -180,9 +208,10 @@ function UserLogin() {
           </Box>
         )}
       </Formik>
+
+    
     </Container>
   );
 }
 
 export default UserLogin;
-

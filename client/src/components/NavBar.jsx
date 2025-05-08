@@ -27,6 +27,7 @@ function NavBar() {
           <li className="nav li"><Link to="/">Home</Link></li>
           <li className="nav li"><Link to="/fruit-type">Fruit Types</Link></li>
           <li className="nav li"><Link to="/map">Map</Link></li>
+          <li className="nav li"><Link to="/forum_posts">Community Forum</Link></li>
 
           {!user && (
             <li className="nav li"><Link to="/login">Login</Link></li>

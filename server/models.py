@@ -86,7 +86,8 @@ class User(db.Model, SerializerMixin):
 
     # Password checking on login
     def authenticate(self, password):
-        return check_password_hash(self._password_hash, password)
+        return bcrypt.check_password_hash(self._password_hash, password)
+
     
     def __repr__(self):
         return f"<User {self.username}>"
@@ -102,11 +103,12 @@ class ForumPost(db.Model, SerializerMixin):
 
     user = db.relationship('User', backref='forum_posts')
 
-    serialize_rules = ('-user._password_hash', '-user.trees',)
+    # Updated serialize_rules to prevent recursion
+    serialize_rules = ('-user._password_hash', '-user.trees', '-user.forum_posts')  
 
     def __repr__(self):
         return f"<ForumPost {self.title[:20]}...>"
-    
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -114,5 +116,8 @@ class ForumPost(db.Model, SerializerMixin):
             'title': self.title,
             'content': self.content,
             'created_at': self.created_at.isoformat(),
-            'user': self.user.to_dict() if self.user else None
+            'user': {'id': self.user.id, 'username': self.user.username} if self.user else None  
         }
+
+
+

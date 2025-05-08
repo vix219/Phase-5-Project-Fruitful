@@ -196,7 +196,8 @@ class FruitTypeById(Resource):
 class ForumPostResource(Resource):
     def get(self):
         try:
-            posts = ForumPost.query.order_by(ForumPost.created_at.desc()).all()
+            posts = ForumPost.query.all()
+            # Serialize posts using the built-in to_dict() method from SQLAlchemy-Serializer
             return [post.to_dict() for post in posts], 200
         except Exception as e:
             print("Error fetching posts:", e)
@@ -212,6 +213,7 @@ class ForumPostResource(Resource):
             )
             db.session.add(new_post)
             db.session.commit()
+            # Serialize the new post using SQLAlchemy-Serializer's to_dict()
             return new_post.to_dict(), 201
         except Exception as e:
             print("Error creating post:", e)

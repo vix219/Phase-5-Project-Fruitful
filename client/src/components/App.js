@@ -1,5 +1,3 @@
-// src/components/App.js
-
 import "../HomePage.css";
 import "../FruitType.css";
 

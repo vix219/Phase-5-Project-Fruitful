@@ -50,7 +50,7 @@ def create_fruit_types():
         ),
           FruitType(
             fruit_name='Texas Common Fig',
-            image_url='https://farm4.static.flickr.com/3154/2734229554_36057b12f7.jpg',
+            image_url='https://www.sierravistagrowers.net/sites/default/files/texas%20everbearing%20figs_0.JPG',
             info='Texas Common Fig (Ficus carica) is a deciduous fruit tree well-suited to the Texas climate, producing sweet, pear-shaped fruits that range in color from green to dark purple. The fruit is eaten fresh or used in preserves, and the tree thrives in warm, sunny locations with well-drained soil. It’s a popular choice for home gardens due to its low maintenance and productive yields.',
             season='Summer'
         )

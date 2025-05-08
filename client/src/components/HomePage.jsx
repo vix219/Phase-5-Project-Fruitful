@@ -9,7 +9,6 @@ function HomePage() {
       <img src="/foraging.webp" alt="Foraging visual" />
       <p className="p">Celebrating the Earth, and the communities that help her thrive.</p>
       <h3 className="h3">Become part of the journey...</h3>
-      <Forum/>
     </div>
   );
 }

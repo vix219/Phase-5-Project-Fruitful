@@ -7,6 +7,7 @@ import UserLogin from "./components/UserLogin";
 import UserPortal from "./components/UserPortal";
 import MapComponent from "./components/MapComponent.jsx";
 import FruitType from "./components/FruitType.jsx";
+import Forum from "./components/Forum.jsx";
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
       { path: 'login', element: <UserLogin /> },
       { path: 'portal', element: <UserPortal /> },
       { path: 'fruit-type', element: <FruitType /> },
+      { path: 'forum_posts', element: <Forum /> },
     ],
   }
 ]);

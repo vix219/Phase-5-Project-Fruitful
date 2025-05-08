@@ -1,19 +1,22 @@
+// Import necessary modules and components from React and Material UI
 import React, { useEffect, useState } from 'react';
 import {
   Container,
   Typography,
-  TextField,
   Button,
   Box,
   Paper,
   Divider,
   FormControl,
   InputLabel,
-  OutlinedInput
+  OutlinedInput,
 } from '@mui/material';
 
 function UserPortal() {
+  // State to store user object (null by default until loaded from localStorage)
   const [user, setUser] = useState(null);
+
+  // State to manage profile information with initial empty values
   const [profile, setProfile] = useState({
     firstName: '',
     lastName: '',
@@ -21,11 +24,17 @@ function UserPortal() {
     bio: '',
   });
 
+  // useEffect runs once on component mount to load logged-in user data from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('loggedInUser');
     if (storedUser) {
+      // Parse JSON string into JS object
       const parsedUser = JSON.parse(storedUser);
+
+      // Set user state with retrieved data
       setUser(parsedUser);
+
+      // Initialize profile state using available data (fallback to empty strings)
       setProfile({
         firstName: parsedUser.firstName || '',
         lastName: parsedUser.lastName || '',
@@ -35,10 +44,12 @@ function UserPortal() {
     }
   }, []);
 
+  // useEffect to load separately saved user profile (could override user-provided info)
   useEffect(() => {
     const savedProfile = localStorage.getItem('userProfile');
     if (savedProfile) {
       const { firstName, lastName, bio } = JSON.parse(savedProfile);
+      // Overwrite profile with saved profile data
       setProfile({
         firstName,
         lastName,
@@ -47,6 +58,7 @@ function UserPortal() {
     }
   }, []);
 
+  // Save the profile data (firstName, lastName, bio) to localStorage
   const handleSaveBio = () => {
     const userProfile = {
       firstName: profile.firstName,
@@ -57,10 +69,13 @@ function UserPortal() {
     alert('Profile saved!');
   };
 
+  // Higher-order function: returns an event handler for updating individual fields
   const handleProfileChange = (field) => (e) => {
+    // Update only the changed field using dynamic key assignment
     setProfile({ ...profile, [field]: e.target.value });
   };
 
+  // If no user is logged in, show a message instead of the profile UI
   if (!user) {
     return (
       <Container>
@@ -71,6 +86,7 @@ function UserPortal() {
     );
   }
 
+  // Main UI rendering when user is logged in
   return (
     <Container maxWidth="md" sx={{ mt: 5 }}>
       <Paper elevation={4} sx={{ p: 4 }}>
@@ -84,19 +100,20 @@ function UserPortal() {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* Profile Information */}
+        {/* Profile Input Section */}
         <Typography variant="h6" gutterBottom>
           User Profile
         </Typography>
 
         <Box
           sx={{
-            display: 'grid',
-            gap: 3,
-            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+            display: 'grid', // Use CSS Grid for layout
+            gap: 3, // Gap between grid items
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, // Responsive column layout
             mb: 4,
           }}
         >
+          {/* First Name Input */}
           <FormControl fullWidth variant="outlined">
             <InputLabel htmlFor="firstName">First Name</InputLabel>
             <OutlinedInput
@@ -107,6 +124,7 @@ function UserPortal() {
             />
           </FormControl>
 
+          {/* Last Name Input */}
           <FormControl fullWidth variant="outlined">
             <InputLabel htmlFor="lastName">Last Name</InputLabel>
             <OutlinedInput
@@ -117,6 +135,7 @@ function UserPortal() {
             />
           </FormControl>
 
+          {/* Bio Input Field */}
           <FormControl fullWidth variant="outlined">
             <InputLabel htmlFor="bio">Short Bio</InputLabel>
             <OutlinedInput
@@ -125,12 +144,13 @@ function UserPortal() {
               onChange={handleProfileChange('bio')}
               label="Short Bio"
               multiline
-              rows={4}
-              sx={{ gridColumn: 'span 2' }}
+              rows={4} // Make it a multi-line input
+              sx={{ gridColumn: 'span 2' }} // Span across both columns in grid layout
             />
           </FormControl>
         </Box>
 
+        {/* Save Button */}
         <Button
           variant="contained"
           color="primary"
@@ -140,6 +160,7 @@ function UserPortal() {
           Save Profile
         </Button>
 
+        {/* Conditional rendering: Show summary only if all fields are filled */}
         {profile.firstName && profile.lastName && profile.bio && (
           <Box sx={{ mt: 4 }}>
             <Typography variant="h6">Your Profile:</Typography>
