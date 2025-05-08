@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "./TreeList.css"
 
 const TreeListComponent = ({ trees, setListOfTrees }) => {
   const [editingTreeId, setEditingTreeId] = useState(null);

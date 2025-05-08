@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Typography, TextField, Button, Box, Paper, Divider, FormControl, InputLabel, OutlinedInput } from '@mui/material';
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Paper,
+  Divider,
+  FormControl,
+  InputLabel,
+  OutlinedInput
+} from '@mui/material';
 
 function UserPortal() {
   const [user, setUser] = useState(null);
-  const [treeData, setTreeData] = useState('');
-  const [savedTree, setSavedTree] = useState(null);
   const [profile, setProfile] = useState({
     firstName: '',
     lastName: '',
@@ -27,14 +36,6 @@ function UserPortal() {
   }, []);
 
   useEffect(() => {
-    const saved = localStorage.getItem('userTreeData');
-    if (saved) {
-      setSavedTree(saved);
-      setTreeData(saved);
-    }
-  }, []);
-
-  useEffect(() => {
     const savedProfile = localStorage.getItem('userProfile');
     if (savedProfile) {
       const { firstName, lastName, bio } = JSON.parse(savedProfile);
@@ -45,11 +46,6 @@ function UserPortal() {
       });
     }
   }, []);
-
-  const handleSaveTree = () => {
-    localStorage.setItem('userTreeData', treeData);
-    setSavedTree(treeData);
-  };
 
   const handleSaveBio = () => {
     const userProfile = {
@@ -93,7 +89,6 @@ function UserPortal() {
           User Profile
         </Typography>
 
-        {/* User profile info */}
         <Box
           sx={{
             display: 'grid',
@@ -136,7 +131,6 @@ function UserPortal() {
           </FormControl>
         </Box>
 
-        {/* Save Bio Button */}
         <Button
           variant="contained"
           color="primary"
@@ -146,7 +140,6 @@ function UserPortal() {
           Save Profile
         </Button>
 
-        {/* Display Saved Profile */}
         {profile.firstName && profile.lastName && profile.bio && (
           <Box sx={{ mt: 4 }}>
             <Typography variant="h6">Your Profile:</Typography>
@@ -154,38 +147,6 @@ function UserPortal() {
               <strong>Name:</strong> {profile.firstName} {profile.lastName}
               <br />
               <strong>Bio:</strong> {profile.bio}
-            </Paper>
-          </Box>
-        )}
-
-        {/* Tree Data Section */}
-        <Typography variant="h6" gutterBottom>
-          Your Tree Data
-        </Typography>
-        <TextField
-          label="Enter your Tree Data"
-          multiline
-          rows={6}
-          fullWidth
-          value={treeData}
-          onChange={(e) => setTreeData(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2 }}
-          onClick={handleSaveTree}
-        >
-          Save Tree
-        </Button>
-
-        {savedTree && (
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h6">Saved Tree:</Typography>
-            <Paper sx={{ p: 2, backgroundColor: '#f9f9f9', whiteSpace: 'pre-wrap' }}>
-              {savedTree}
             </Paper>
           </Box>
         )}

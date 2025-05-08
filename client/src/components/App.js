@@ -2,6 +2,7 @@
 
 import "../HomePage.css";
 import "../FruitType.css";
+
 import HomePage from "./HomePage";
 import FruitType from "./FruitType";
 import UserLogin from "./UserLogin";

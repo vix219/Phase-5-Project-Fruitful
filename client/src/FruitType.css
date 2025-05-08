@@ -1,12 +1,10 @@
-Fruit CSS
 
 /* Container to hold all fruit cards */
 .fruit-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);  
   gap: 20px;
-  padding: 10px;
-  justify-items: center;
+  padding: 20px;
 }
 
 /* Individual fruit card */
